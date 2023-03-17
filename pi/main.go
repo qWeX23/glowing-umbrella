@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
+	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/shirou/gopsutil/host"
@@ -41,7 +43,21 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to get CPU temperature: %v", err)
 	}
+	// create a sample object
+	data := map[string]interface{}{
+		"time":  time.Now().UTC().Unix(),
+		"temps": cpuTemp,
+	}
 
+	// convert object to JSON string
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+
+	// print JSON string
+	fmt.Println(string(jsonData))
 	// Send the CPU temperature to the queue
 	err = ch.Publish(
 		"",
@@ -50,7 +66,7 @@ func main() {
 		false,
 		amqp.Publishing{
 			ContentType: "text/plain",
-			Body:        []byte(fmt.Sprintf("Current CPU temperature: %v\n", cpuTemp[0].Temperature)),
+			Body:        []byte(string(jsonData)),
 		},
 	)
 	if err != nil {

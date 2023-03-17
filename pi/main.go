@@ -11,6 +11,17 @@ import (
 )
 
 func main() {
+	// Loop forever
+	for {
+		// Call the stubbed out function
+		sendToRabbit()
+
+		// Wait for five minutes
+		time.Sleep(5 * time.Minute)
+	}
+}
+
+func sendToRabbit() {
 	// Connect to RabbitMQ server
 	conn, err := amqp.Dial("amqp://username:password@192.168.1.16:5672/")
 	if err != nil {
